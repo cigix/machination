@@ -1,0 +1,55 @@
+{
+  "start": {
+    "NUL": [ "NUL", -1, "start:backone" ],
+    "ELSE": [ "SAME", 1, "start" ]
+  },
+  "start:backone": {
+    "ELSE": [ "SAME", -1, "reverse:skipblanks:back" ]
+  },
+
+  "reverse:skipblanks:back": {
+    "EOT": [ "EOT", 1, "delimiting:skipblanks" ],
+    "NUL": [ "NUL", -1, "SAME" ],
+    "ELSE": [ "NUL", 1, "reverse:skipblanks:move." ]
+  },
+  "reverse:skipblanks:move.": {
+    "NUL": [ "NUL", 1, "SAME" ],
+    "ELSE": [ "SAME", 1, "reverse:skipchars:move." ]
+  },
+  "reverse:skipchars:move.": {
+    "NUL": [ "DOT", -1, "reverse:skipchars:back" ],
+    "ELSE": [ "SAME", 1, "SAME" ]
+  },
+  "reverse:skipchars:back": {
+    "NUL": [ "NUL", -1, "reverse:skipblanks:back" ],
+    "ELSE": [ "SAME", -1, "SAME" ]
+  },
+
+  "delimiting:skipblanks": {
+    "NUL": [ "NUL", 1, "SAME" ],
+    "ELSE": [ "SAME", 1, "delimiting:skipchars" ]
+  },
+  "delimiting:skipchars": {
+    "NUL": [ "EOT", -1, "delimiting:backtofirst" ],
+    "ELSE": [ "SAME", 1, "SAME" ]
+  },
+  "delimiting:backtofirst": {
+    "NUL": [ "NUL", 1, "move:skipblanks:back" ],
+    "ELSE": [ "SAME", -1, "SAME" ]
+  },
+
+  "move:skipblanks:back": {
+    "EOT": [ "NUL", 0, "final" ],
+    "NUL": [ "NUL", 1, "SAME" ],
+    "ELSE": [ "NUL", -1, "move:skipblanks:move." ]
+  },
+  "move:skipblanks:move.": {
+    "NUL": [ "NUL", -1, "SAME" ],
+    "ELSE": [ "SAME", 1, "move:write." ]
+  },
+  "move:write.": {
+    "ELSE": [ "DOT", 1, "move:skipblanks:back" ]
+  },
+
+  "final": { "ELSE": [ "SAME", 0, "final" ] }
+}

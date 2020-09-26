@@ -44,6 +44,7 @@ Parameters:
               - any string of characters
 
 Options:
+  -c        Write the transition function as a C array into rules.h.
   -g        Print the transition function in a human readable format. This is
             the default behaviour.
   -m        Print the transition function in a mathematical formal format.
@@ -58,9 +59,11 @@ Flatten out the rules of the Turing machine and print them, grouped by state.'''
             if arg in ("-h", "-help", "--help"):
                 print(usagestr)
                 return 0
-            if arg == '-g':
+            if arg == "-c":
+                outputdriver = mtoutput.C()
+            elif arg == "-g":
                 outputdriver = mtoutput.Human()
-            elif arg == '-m':
+            elif arg == "-m":
                 outputdriver = mtoutput.Formal()
             else:
                 print(f"Unknown option: {arg}. Use -h for help",

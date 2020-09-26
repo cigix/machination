@@ -67,3 +67,72 @@ class Formal(OutputDriver):
         direction = ["final", "right", "left"][rule.direction]
         return (f"({state}, {rule.match}) -> "
                 f"({rule.write}, {direction}, {rule.state})")
+
+class C(OutputDriver):
+    '''Format a Turing machine for use in a C program'''
+    def formatrule(*_):
+        raise NotImplementedError("C output driver only implements formatmt()")
+
+    def formatmt(self, states):
+        statenum = { "start": 0 }
+        statenames = list(states.keys())
+        statenames.remove("start")
+        for i, state in enumerate(statenames):
+            statenum[state] = i + 1
+        def symbolchar(symbol):
+            if symbol in ("NUL", "EOT"):
+                return symbol
+            if symbol == "'":
+                return r"'\''"
+            if symbol == '\\':
+                return r"'\\'"
+            return f"'{symbol}'"
+        directions = ["FINAL", "RIGHT", "LEFT"]
+
+        header = '''#define NUL (0)
+#define EOT (0x03) // End of tape <=> End of text
+
+#define LEFT (-1)
+#define RIGHT (1)
+#define FINAL (0)
+
+// Describe one rule of the transition function
+struct rule
+{
+  // Inputs:
+  // The origin state
+  int state;
+  // The current symbol under the head
+  char read;
+
+  // Outputs:
+  // The symbol to write
+  char write;
+  // The movement to apply. Should be in [-1 .. 1].
+  int dir;
+  // The next state
+  int destination;
+};
+
+static struct rule rules[] = {
+'''
+        rule_count = 0;
+        for state, rules in states.items():
+            header += f"  /* {state} */\n"
+            for rule in rules:
+                header += "  { "
+                header += f"{statenum[state]}, "
+                header += f"{symbolchar(rule.match)}, "
+                header += f"{symbolchar(rule.write)}, "
+                header += f"{directions[rule.direction]}, "
+                header += f"{statenum[rule.state]} "
+                header += "},\n"
+                rule_count += 1
+
+        header += "};\n"
+        header += "\n"
+        header += f"#define RULES_SIZE ({rule_count})\n"
+
+        with open("rules.h", 'w') as file:
+            file.write(header)
+        return "Successfully written transition function as rules.h"

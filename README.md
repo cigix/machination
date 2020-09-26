@@ -1,5 +1,5 @@
 # Machination
-## A Turing machine description language and parser
+## A Turing machine description language, parser, and runtime
 
 ## Syntax
 
@@ -75,3 +75,37 @@ The alphabet is given as input to the parser. On top of the given characters,
 two special symbols are injected in the alphabet:
 * `"NUL"` which symbolizes a empty space
 * `"EOT"` which symbolizes the end of the tape
+
+## Tooling
+
+`mtparser.py` is a Python module that flattens the above description language.
+You can use it to turn a high level description of the Turing machine into a set
+of low level rules.
+
+`mtoutput.py` is a Python module that turns the rules built by `mtparser.py`
+into text. There are 3 output drivers:
+* for humans
+* for mathematicians
+* for C compilers
+
+`machination` is a frontend for the two modules above. It parses a JSON file
+describing a Turing machine, and rewrites it as plain rules. It can output the
+Turing machine as a C array into a header file.
+
+`mtruntime.c` is a runtime for a rule array as output by `machination`. You can
+use the associated `Makefile` to turn your Turing machine into an executable.
+
+## Example
+
+[https://github.com/cigix/machination/blob/main/reverse.json](`reverse.json`)
+contains an example of the description of a Turing machine that reverses a
+string. To use it:
+
+```
+$ ./machination -c reverse.json ASCII
+Successfully written transition function as rules.h
+$ make
+cc -o mtruntime mtruntime.c
+$ ./mtruntime "Hello world!"
+!dlrow olleH
+```
