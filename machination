@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+
+import json
+import string
+import sys
+
+import mtparser
+
+def main(argv):
+    '''main(argv): Entrypoint of the machination executable
+
+    Parameters:
+      - argv: list of str, the arguments to the program
+
+    Return: int, the exit code of the program
+    '''
+    usagestr = f'''Usage: {argv[0]} <FILE> <ALPHABET>
+
+Parameters:
+  FILE      A JSON file containing the Turing machine description
+  ALPHABET  The set of symbols of the Turing machine. Can be one of:
+              - ASCII: all the non-control characters of ASCII
+              - any string of characters
+
+Flatten out the rules of the Turing machine and print them, grouped by state.'''
+    if len(argv) != 3:
+        print(usagestr, file=sys.stderr)
+        return 1
+    if ("-h" in argv) or ("-help" in argv) or ("--help" in argv):
+        print(usagestr)
+        return 0
+
+    with open(argv[1]) as descfile:
+        mtdesc = json.load(descfile)
+
+    if argv[2] == "ASCII":
+        alphabet = string.ascii_letters
+        alphabet += string.digits
+        alphabet += string.punctuation
+        alphabet += ' '
+    else:
+        alphabet = argv[2]
+
+    states = mtparser.parse(mtdesc, alphabet)
+
+    for state, rules in states.items():
+        print(f"{state}:")
+        for rule in rules:
+            match = f"{rule.match}:"
+            write = f'"{rule.write}",'
+            direction = ["0,", "right,", "left,"][rule.direction]
+            print(f"  {match:4} {write:6} {direction:6} {rule.state}")
+
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

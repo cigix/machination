@@ -1,10 +1,13 @@
 # Machination
-## A Turing machine description language
+## A Turing machine description language and parser
 
 ## Syntax
 
-The Turing machine is described with a JSON file. The fields of the root object
-each name a state or state-template.
+The Turing machine is described with a dictionary structure. This could be a
+JSON object, or an equivalent Python `dict`. The fields of the root object
+each name a state or state-template. The state named `"start"` is the initial
+state of the execution, while any state featuring a `0` [#direction](direction)
+is a final state.
 
 ### Symbol
 
