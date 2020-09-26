@@ -4,7 +4,28 @@ import json
 import string
 import sys
 
+import mtoutput
 import mtparser
+
+def parsealphabet(arg):
+    '''parsealphabet(arg): Read an alphabet
+
+    Parameters:
+      - arg: the given alphabet
+
+    Return: str, the alphabet to use.
+
+    If arg is "ASCII", return all the non-control characters of ASCII, otherwise
+    return arg.
+    '''
+    if arg == "ASCII":
+        alphabet = string.ascii_letters
+        alphabet += string.digits
+        alphabet += string.punctuation
+        alphabet += ' '
+    else:
+        alphabet = arg
+    return alphabet
 
 def main(argv):
     '''main(argv): Entrypoint of the machination executable
@@ -14,7 +35,7 @@ def main(argv):
 
     Return: int, the exit code of the program
     '''
-    usagestr = f'''Usage: {argv[0]} <FILE> <ALPHABET>
+    usagestr = f'''Usage: {argv[0]} [OPTIONS...] <FILE> <ALPHABET>
 
 Parameters:
   FILE      A JSON file containing the Turing machine description
@@ -22,34 +43,44 @@ Parameters:
               - ASCII: all the non-control characters of ASCII
               - any string of characters
 
+Options:
+  -g        Print the transition function in a human readable format. This is
+            the default behaviour.
+  -m        Print the transition function in a mathematical formal format.
+
+  -h, -help, --help  Print this help
+
 Flatten out the rules of the Turing machine and print them, grouped by state.'''
-    if len(argv) != 3:
+    positionals = list()
+    outputdriver = mtoutput.Human()
+    for arg in argv[1:]:
+        if arg[0] == '-':
+            if arg in ("-h", "-help", "--help"):
+                print(usagestr)
+                return 0
+            if arg == '-g':
+                outputdriver = mtoutput.Human()
+            elif arg == '-m':
+                outputdriver = mtoutput.Formal()
+            else:
+                print(f"Unknown option: {arg}. Use -h for help",
+                      file=sys.stderr)
+                return 1
+        else:
+            positionals.append(arg)
+
+    if len(positionals) != 2:
         print(usagestr, file=sys.stderr)
         return 1
-    if ("-h" in argv) or ("-help" in argv) or ("--help" in argv):
-        print(usagestr)
-        return 0
 
-    with open(argv[1]) as descfile:
+    with open(positionals[0]) as descfile:
         mtdesc = json.load(descfile)
 
-    if argv[2] == "ASCII":
-        alphabet = string.ascii_letters
-        alphabet += string.digits
-        alphabet += string.punctuation
-        alphabet += ' '
-    else:
-        alphabet = argv[2]
+    alphabet = parsealphabet(positionals[1])
 
     states = mtparser.parse(mtdesc, alphabet)
 
-    for state, rules in states.items():
-        print(f"{state}:")
-        for rule in rules:
-            match = f"{rule.match}:"
-            write = f'"{rule.write}",'
-            direction = ["0,", "right,", "left,"][rule.direction]
-            print(f"  {match:4} {write:6} {direction:6} {rule.state}")
+    print(outputdriver.formatmt(states))
 
     return 0
 
