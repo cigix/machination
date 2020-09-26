@@ -6,29 +6,29 @@
 The Turing machine is described with a dictionary structure. This could be a
 JSON object, or an equivalent Python `dict`. The fields of the root object
 each name a state or state-template. The state named `"start"` is the initial
-state of the execution, while any state featuring a `0` [#direction](direction)
+state of the execution, while any state featuring a `0` [direction](#direction)
 is a final state.
 
 ### Symbol
 
 A symbol is either:
 * a one character string
-* `"NUL"` (see [#alphabet](Alphabet)
-* `"EOT"` (see [#alphabet](Alphabet)
+* `"NUL"` (see [alphabet](#Alphabet))
+* `"EOT"` (see [alphabet](#Alphabet))
 * special strings depending on the context
 
 ### Direction
 
 A direction is either:
-* `"left"`
-* `"right"`
+* `"left"` or `-1`
+* `"right"` or `1`
 * `0` for a final state
 
 ### Rule
 
 A rule is an array with three fields:
-0. a [#symbol](symbol) to write
-1. a [#direction](direction) to shift to
+0. a [symbol](#symbol) to write
+1. a [direction](#direction) to shift to
 2. the name of a state or state-template to go to
 
 In a rule, having the string `"SAME"` as the symbol means "write the same
@@ -38,8 +38,8 @@ current one", essentially a noop state-wise.
 
 ### State
 
-A state is an object where each field is a named [#rule](rule), named after the
-[#symbol](symbol) to match.
+A state is an object where each field is a named [rule](#rule), named after the
+[symbol](#symbol) to match.
 
 In a state, having the string `"ELSE"` as the name of a rule means "duplicate
 this rule for every symbol not explicitely mentionned". 
@@ -97,9 +97,8 @@ use the associated `Makefile` to turn your Turing machine into an executable.
 
 ## Example
 
-[https://github.com/cigix/machination/blob/main/reverse.json](`reverse.json`)
-contains an example of the description of a Turing machine that reverses a
-string. To use it:
+[reverse.json](reverse.json) contains an example of the description of a Turing
+machine that reverses a string. To use it:
 
 ```
 $ ./machination -c reverse.json ASCII
